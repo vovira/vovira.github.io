@@ -1,0 +1,129 @@
+﻿<body>
+
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .spacer {
+            height: 15px;
+        }
+        
+        textarea {
+            width: 700px;
+            height: 180px;
+            resize: none;
+            border-radius: 8px;
+        }
+        
+         ::-webkit-input-placeholder {
+            line-height: 170px;
+            text-align: center;
+            color: #0000ff;
+        }
+        
+        button {
+            font-weight: bold;
+            height: 4vh;
+            background-color: #00ffff;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+        }
+        
+        #textInput::placeholder {
+            font-weight: bold;
+        }
+        
+        #textOutput::placeholder {
+            font-weight: bold;
+        }
+    </style>
+    <div class="container">
+        We are learning English!
+        <div class=" spacer"></div>
+        <textarea id="textInput" placeholder="Here you will see the text spoken by you"></textarea>
+        <div class=" spacer"></div>
+        <button id="sendButton" onclick="speech()">Do you want to say something? Click here - and talk</button>
+        <div class=" spacer"></div>
+        <textarea id="textOutput" placeholder="Here you will see the answer pronounced by Artificial Intelligence (AI)"></textarea>
+        <div class=" spacer"></div>
+        <button onclick="talk(outp.value)">Want to listen to the AI-pronounced answer again - click here</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+ 
+    <script>   
+        let apiKey = 'sk-proj-XKB2ACw3ImhbSEervL96T3BlbkFJXu2zrbkZFM5kQ88hbki8';
+        // let apiKey = 'sk-proj-TQA2rzfkgMhrnTTznFxWT3BlbkFJ4IZqmLMKtXNHGlK6ZjJG';
+
+        let sendButton = window.document.getElementById('sendButton');
+
+        let inp = window.document.getElementById('textInput');
+
+        let outp = window.document.getElementById('textOutput');
+
+        let conversation = [];
+
+        let speechRecognizer = new webkitSpeechRecognition();        // voice recognition
+
+        let speechSynthesis = window.speechSynthesis;                // voice synthesis
+
+        const speech = () => {
+            speechRecognizer.lang = 'en-GB';
+            // speechRecognizer.continuous = true;
+            // speechRecognizer.interimResults = true;
+            speechRecognizer.start();
+            sendButton.innerText = 'Speak...';
+        }
+
+        const talk = (text) => {
+            let textToTalk = new SpeechSynthesisUtterance(text);
+            textToTalk.onend = function(event) {
+                sendButton.innerText = 'Do you want to say something else? Click here - and talk';
+            };
+            textToTalk.lang = 'en-GB';
+            textToTalk.rate = 0.5;
+            // textToTalk.pitch = 1.0;
+            speechSynthesis.speak(textToTalk);
+        }
+
+        let request = axios.create({                                 // integrare Chat GPT
+            headers: {
+                Authorization: `Bearer ${apiKey}`
+            }
+        })
+
+        speechRecognizer.onresult = (event) => {                    
+            inp.value = event.results[0][0].transcript;
+            requestFunc();
+        }
+
+        const requestFunc = () => {
+            if (inp.value) {
+                sendButton.innerText = 'One moment...';
+                let message = {
+                    "role": "user",
+                    "content": `${inp.value}`
+                }
+                conversation.push(message);
+                let params = {
+                    "model": "gpt-3.5-turbo",
+                    "messages": conversation
+                };
+                request.post('https://api.openai.com/v1/chat/completions', params)
+                    .then(response => {
+                        outp.value = response.data.choices[0].message.content;
+                        let gptMessage = {
+                            "role": "assistant",
+                            "content": `${outp.value}`
+                        }
+                        conversation.push(gptMessage);
+                        talk(outp.value);
+                    })
+            }
+        }
+    </script>
+</body>
