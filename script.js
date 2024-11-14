@@ -1,6 +1,3 @@
-// let apiKey = 'sk-proj-XKB2ACw3ImhbSEervL96T3BlbkFJXu2zrbkZFM5kQ88hbki8';
-let apiKey = 'sk-proj-TQA2rzfkgMhrnTTznFxWT3BlbkFJ4IZqmLMKtXNHGlK6ZjJG';
-
 let sendButton = window.document.getElementById('sendButton');
 
 let inp = window.document.getElementById('textInput');
