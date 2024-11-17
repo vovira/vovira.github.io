@@ -32,7 +32,7 @@ speechSynthesis.speak(textToTalk);
 let request = axios.create({
 // GPT-Chat-Integration
 headers: {
-Authorization: `Bearer ${apiKey}`
+Authorization: `Bearer ${ak}`
 }
 })
 
